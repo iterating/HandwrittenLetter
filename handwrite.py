@@ -37,6 +37,7 @@ screen.blit(text, (260, 30))
 createButton = (220, 65, 250, 35)
 clearButton = (220, 110, 250, 35)
 newSetButton = (220, 155, 250, 35)
+editPrevButton = (220, 200, 250, 35)
 noactcolor = (164, 170, 164)
 actcolor = (184, 238, 57)
 empty = Color(0, 0, 0, 0)
@@ -45,7 +46,7 @@ empty = Color(0, 0, 0, 0)
 t1 = (320, 75)
 t2 = (320, 120)
 t3 = (300, 165)
-t4 = (100, 320)
+t4 = (320, 210)
 textCoords = (65, 320)
 instructions = "Draw --> A"
 
@@ -54,6 +55,7 @@ txtfont = pygame.font.Font("freesansbold.ttf", 15)
 txt1 = txtfont.render("Create", True, BLACK)
 txt2 = txtfont.render("Clear", True, BLACK)
 txt3 = txtfont.render("Create New Set", True, BLACK)
+txt4 = txtfont.render("Edit Previous", True, BLACK)
 
 # Setup initial display
 screen.blit(mydraw, (10, 10))
@@ -68,6 +70,7 @@ no_set = 0
 actset = 0
 letter_act_index = 0
 letterlist = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789,.?{}()-_+=*&^%@<>|/'\"\\;:"
+letter_images = []
 
 def render_display():
     """Display the current instruction on the screen"""
@@ -97,7 +100,7 @@ def check_directory():
 
 def create_letter():
     """Save the current letter as a PNG image and create a new letter"""
-    global actdirectory, letter_act_index, instructions
+    global actdirectory, letter_act_index, instructions, letter_images
     letter = ord(letterlist[letter_act_index])
     imfile = f"{actdirectory}/blue/{letter}.png"
     pygame.image.save(mydraw, imfile)
@@ -106,6 +109,7 @@ def create_letter():
     factor = 0.35
     im_output = enhancer.enhance(factor)
     im_output.save(f"{actdirectory}/black/{letter}.png")
+    letter_images.append((letter, imfile, f"{actdirectory}/black/{letter}.png"))
     letter_act_index += 1
     if letter_act_index < 87:
         instructions = f"Draw --> {letterlist[letter_act_index]}"
@@ -126,9 +130,11 @@ def btn_reset():
     pygame.draw.rect(screen, noactcolor, createButton)
     pygame.draw.rect(screen, noactcolor, clearButton)
     pygame.draw.rect(screen, noactcolor, newSetButton)
+    pygame.draw.rect(screen, noactcolor, editPrevButton)
     screen.blit(txt1, t1)
     screen.blit(txt2, t2)
     screen.blit(txt3, t3)
+    screen.blit(txt4, t4)
     pygame.display.update()
 
 def btn_clicked(btnid):
@@ -140,14 +146,17 @@ def btn_clicked(btnid):
     elif btnid == 2:
         pygame.draw.rect(screen, actcolor, clearButton)
         screen.blit(txt2, t2)
-    else:
+    elif btnid == 3:
         pygame.draw.rect(screen, actcolor, newSetButton)
         screen.blit(txt3, t3)
+    else:
+        pygame.draw.rect(screen, actcolor, editPrevButton)
+        screen.blit(txt4, t4)
     pygame.display.update()
 
 def mouse_clicked(x, y):
     """Check if the mouse is clicked on a button and perform the action"""
-    global letter_act_index, instructions
+    global letter_act_index, instructions, letter_images
     if createButton[0] < x < createButton[0] + createButton[2] and createButton[1] < y < createButton[1] + createButton[3]:
         btn_clicked(1)
         if letter_act_index < 87:
@@ -165,6 +174,20 @@ def mouse_clicked(x, y):
         check_directory()
         instructions = "Draw --> A"
         letter_act_index = 0
+        letter_images = []
+        render_display()
+    elif editPrevButton[0] < x < editPrevButton[0] + editPrevButton[2] and editPrevButton[1] < y < editPrevButton[1] + editPrevButton[3]:
+        btn_clicked(4)
+        if letter_images:
+            letter, blue_file, black_file = letter_images.pop()
+            mydraw.fill(empty)
+            img = pygame.image.load(blue_file)
+            screen.blit(img, (10, 10))
+            letter_act_index -= 1
+            instructions = f"Redraw --> {chr(letter)}"
+        else:
+            instructions = "No previous letters to edit."
+        reset_surface()
         render_display()
 
 check_directory()
