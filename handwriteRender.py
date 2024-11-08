@@ -14,12 +14,12 @@ import random
 import os
 
 
-letter_color = "blue"
-letter_set = "set0"
-trcolor = False
-totalset = len(os.listdir("images/letters")) + 1
+current_letter_color = "blue"
+current_letter_set = "set0"
+toggle_letter_color = False
+total_letter_sets = len(os.listdir("images/letters")) + 1
 
-htmlc = [
+html_content = [
     "<html>",
     "<head>",
     "<style>",
@@ -39,41 +39,42 @@ htmlc = [
 
 
 try:
-    with open("input.txt", "r") as textfile:
-        for line in textfile:
+    with open("input.txt", "r") as input_file:
+        for line in input_file:
             # strips the newline character
-            curst = line.strip()
-            htmlc.append('<div class="lines">')
-            for ch in curst:
+            current_string = line.strip()
+            html_content.append('<div class="lines">')
+            for character in current_string:
                 # get char ASCII Code of char
-                chcode = ord(ch)
+                character_code = ord(character)
 
                 # select Random set
-                random_letter = random.randrange(1, totalset)
-                letter_set = f"set{random_letter}"
+                random_letter_set = random.randrange(1, total_letter_sets)
+                current_letter_set = f"set{random_letter_set}"
 
-                if chcode == 35:
+                if character_code == 35:
                     # toggle color of characters every time the user types a '#'
-                    if trcolor:
-                        letter_color = "blue"
-                        trcolor = False
+                    if toggle_letter_color:
+                        current_letter_color = "blue"
+                        toggle_letter_color = False
                     else:
-                        letter_color = "black"
-                        trcolor = True
-                elif chcode == 32 or chcode == 36:
-                    htmlc.append("<span></span>")
+                        current_letter_color = "black"
+                        toggle_letter_color = True
+                elif character_code == 32 or character_code == 36:
+                    html_content.append("<span></span>")
                 else:
-                    htmlc.append(
-                        f"<img src='images/letters/{letter_set}/{letter_color}/{chcode}.png'/>"
+                    html_content.append(
+                        f"<img src='images/letters/{current_letter_set}/{current_letter_color}/{character_code}.png'/>"
                     )
-            htmlc.append("</div>")
+            html_content.append("</div>")
 
-    htmlc.append("</div></body></html>")
+    html_content.append("</div></body></html>")
 
     with open("output.html", "w") as output_html:
-        output_html.writelines(htmlc)
+        output_html.writelines(html_content)
 except FileNotFoundError:
     print("Error: input.txt not found.")
 except Exception as e:
     print(f"An error occurred: {e}")
+
 

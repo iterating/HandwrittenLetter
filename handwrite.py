@@ -1,4 +1,13 @@
 
+# Constants
+WIDTH = 500
+HEIGHT = 350
+DRAW_WIDTH = 200
+DRAW_HEIGHT = 300
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+
+
 """
 The main file for the Hand Writing project
 
@@ -6,7 +15,8 @@ This program is a simple tool for creating hand writing datasets.
 """
 
 
-import sys, pygame
+import sys
+import pygame
 from pygame.locals import *
 from pygame import Color
 import os
@@ -30,17 +40,11 @@ letterlist = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789,.?{
 
 
 # Set up the display
-screen = pygame.display.set_mode((500, 350))
-screen.fill((255, 255, 255))
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen.fill(WHITE)
+pygame.display.set_caption("Handwritten")
 
-pygame.display.set_caption("My Hand Writing")
-
-##pygame.draw.rect(screen, (255,255,255) , (10,10,200,300))
-mydraw = pygame.Surface((200, 300), pygame.SRCALPHA, 32)
-##pygame.draw.line(screen, (163,163,163) , (10,110), (210,110),1)
-##pygame.draw.line(screen, (163,163,163) , (10,210), (210,210),1)
-##pygame.draw.rect(screen, (0,0,0) , (10,10,200,300),2)
-
+mydraw = pygame.Surface((DRAW_WIDTH, DRAW_HEIGHT), pygame.SRCALPHA)
 
 # Program label
 font = pygame.font.Font("freesansbold.ttf", 18)
@@ -48,14 +52,13 @@ text = font.render("Text To Hand Writing", True, (62, 97, 219))
 screen.blit(text, (260, 30))
 
 # button coordinates
-b1 = (220, 65, 250, 35)
-b2 = (220, 110, 250, 35)
-b3 = (220, 155, 250, 35)
+createButton = (220, 65, 250, 35)
+clearButton = (220, 110, 250, 35)
+newSetButton = (220, 155, 250, 35)
 
 # button color
 noactcolor = (164, 170, 164)
 actcolor = (184, 238, 57)
-black = (0, 0, 0)
 empty = Color(0, 0, 0, 0)
 
 # text coordinates
@@ -65,23 +68,22 @@ t3 = (300, 165)
 
 # Error label
 t4 = (100, 320)
-dt = (65, 320)
-dtxt = "Draw --> A"
+textCoords = (65, 320)
+instructions = "Draw --> A"
 font1 = pygame.font.Font("freesansbold.ttf", 20)
 try:
-    dtext = font1.render(dtxt, True, black)
+    textbox = font1.render(instructions, True, BLACK)
 except pygame.error as e:
     print("Error: {}".format(e))
     sys.exit()
 
-
-screen.blit(dtext, dt)
+screen.blit(textbox, textCoords)
 
 # text font size/style
 txtfont = pygame.font.Font("freesansbold.ttf", 15)
-txt1 = txtfont.render("Create", True, black)
-txt2 = txtfont.render("Clear", True, black)
-txt3 = txtfont.render("Create New Set", True, black)
+txt1 = txtfont.render("Create", True, BLACK)
+txt2 = txtfont.render("Clear", True, BLACK)
+txt3 = txtfont.render("Create New Set", True, BLACK)
 
 
 screen.blit(mydraw, (10, 10))
@@ -93,17 +95,13 @@ pygame.display.update()
 clock = pygame.time.Clock()
 
 
-def display_mess():
+def render_display():
     """
     Display the current instruction on the screen
     """
-    global dtxt
-    pygame.draw.rect(screen, (255, 255, 255), (65, 320, 120, 100))
-    dtext = font1.render(dtxt, True, black)
-    screen.blit(dtext, dt)
-    pygame.display.update()
-
-
+    screen.fill(WHITE, (65, 320, 120, 100))
+    textbox = font1.render(instructions, True, BLACK)
+    screen.blit(textbox, textCoords)
 def check_directory():
     """
     Check if the directory exists and create it if it doesn't
@@ -133,7 +131,7 @@ def create_letter():
     """
     global actdirectory
     global letter_act_index
-    global dtxt
+    global instructions
     letter = ord(letterlist[letter_act_index])
     imfile = "{}/blue/{}.png".format(actdirectory, letter)
     # Blue Letter
@@ -147,9 +145,9 @@ def create_letter():
     im_output.save("{}/black/{}.png".format(actdirectory, letter))
     letter_act_index += 1
     if letter_act_index < 87:
-        dtxt = "Draw --> {}".format(letterlist[letter_act_index])
+        instructions = "Draw --> {}".format(letterlist[letter_act_index])
     else:
-        dtxt = "Set Done."
+        instructions = "Set Done."
         btn_reset()
 
 
@@ -157,11 +155,11 @@ def reset_surface():
     """
     Reset the drawing surface
     """
-    pygame.draw.rect(screen, (255, 255, 255), (10, 10, 200, 300))
+    pygame.draw.rect(screen, WHITE, (10, 10, DRAW_WIDTH, DRAW_HEIGHT))
     mydraw.fill(empty)
     pygame.draw.line(screen, (163, 163, 163), (10, 110), (210, 110), 1)
     pygame.draw.line(screen, (163, 163, 163), (10, 210), (210, 210), 1)
-    pygame.draw.rect(screen, (0, 0, 0), (10, 10, 200, 300), 2)
+    pygame.draw.rect(screen, BLACK, (10, 10, DRAW_WIDTH, DRAW_HEIGHT), 2)
 
 
 def btn_reset():
@@ -169,9 +167,9 @@ def btn_reset():
     Reset the buttons
     """
     # draw buttons
-    pygame.draw.rect(screen, noactcolor, b1)
-    pygame.draw.rect(screen, noactcolor, b2)
-    pygame.draw.rect(screen, noactcolor, b3)
+    pygame.draw.rect(screen, noactcolor, createButton)
+    pygame.draw.rect(screen, noactcolor, clearButton)
+    pygame.draw.rect(screen, noactcolor, newSetButton)
 
     # write Text
     screen.blit(txt1, t1)
@@ -186,13 +184,13 @@ def btn_clicked(btnid):
     """
     btn_reset()
     if btnid == 1:
-        pygame.draw.rect(screen, actcolor, b1)
+        pygame.draw.rect(screen, actcolor, createButton)
         screen.blit(txt1, t1)
     elif btnid == 2:
-        pygame.draw.rect(screen, actcolor, b2)
+        pygame.draw.rect(screen, actcolor, clearButton)
         screen.blit(txt2, t2)
     else:
-        pygame.draw.rect(screen, actcolor, b3)
+        pygame.draw.rect(screen, actcolor, newSetButton)
         screen.blit(txt3, t3)
     pygame.display.update()
 
@@ -202,34 +200,34 @@ def mouse_clicked(x, y):
     Check if the mouse is clicked on a button and perform the action
     """
     global letter_act_index
-    global dtxt
+    global instructions
     if x > 220 and y > 65 and x < 470 and y < 100:
         btn_clicked(1)
         if letter_act_index < 87:
             create_letter()
         else:
-            dtxt = "Set Done."
+            instructions = "Set Done. Ready to render input.txt"
             btn_reset()
         reset_surface()
-        display_mess()
+        render_display()
     elif x > 220 and y > 110 and x < 470 and y < 145:
         btn_clicked(2)
         reset_surface()
     elif x > 220 and y > 155 and x < 470 and y < 190:
         btn_clicked(3)
         check_directory()
-        dtxt = "Draw --> A"
+        instructions = "Draw --> A"
         letter_act_index = 0
-        display_mess()
+        render_display()
 
 
 check_directory()
 reset_surface()
-display_mess()
+render_display()
 btn_reset()
 
-while 1:
-    clock.tick(30)
+while True:
+    clock.tick(50)
     x, y = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
     for event in pygame.event.get():
