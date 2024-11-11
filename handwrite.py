@@ -54,7 +54,7 @@ instructions = "Draw --> A"
 txtfont = pygame.font.Font("freesansbold.ttf", 15)
 txt1 = txtfont.render("Create", True, BLACK)
 txt2 = txtfont.render("Clear", True, BLACK)
-txt3 = txtfont.render("Create New Set", True, BLACK)
+txt3 = txtfont.render("Create New Trace Set", True, BLACK)
 txt4 = txtfont.render("Edit Previous", True, BLACK)
 
 # Setup initial display
@@ -162,7 +162,7 @@ def mouse_clicked(x, y):
         if letter_act_index < 87:
             create_letter()
         else:
-            instructions = "Set Done. Ready to render input.txt"
+            instructions = "Handwriting trace set done. Ready to render input.txt"
             btn_reset()
         reset_surface()
         render_display()
