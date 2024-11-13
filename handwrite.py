@@ -114,7 +114,7 @@ def create_letter():
     if letter_act_index < 87:
         instructions = f"Draw --> {letterlist[letter_act_index]}"
     else:
-        instructions = "Set Done."
+        instructions = "Tracing Set Done."
         btn_reset()
 
 def reset_surface():

@@ -1,6 +1,7 @@
 # Convert typed text to handwritten letters
 
-This project provides a simple tool for converting typed text into handwritten letters. The application is built using Python, Pygame, and Pillow libraries.
+Practice your manual handwriting skills. Then use the letters you've practiced to convert typed text into a handwritten format!
+. The application is built using Python, Pygame, and Pillow libraries.
 
 ## Features
 
@@ -8,6 +9,7 @@ This project provides a simple tool for converting typed text into handwritten l
 - Supports a variety of characters including alphabets, numbers, and special symbols.
 - Renders the handwritten text into an HTML file with customizable styles.
 - Randomly selects character styles from a predefined set of images.
+- Works great on a tablet or laptop with a touchscreen.
 
 ## Installation
 
