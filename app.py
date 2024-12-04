@@ -19,4 +19,4 @@ def render_handwriting():
     return jsonify({"image_url": image_url})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
