@@ -42,3 +42,6 @@ The output is written to a file named output.html.
 - `images/`: Contains images used for rendering characters.
 - `input.txt`: Input text file containing the text to be converted.
 - `output.html`: The output file containing the rendered handwritten text.
+
+### Future plans
+- react native version
