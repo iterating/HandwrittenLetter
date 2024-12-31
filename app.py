@@ -21,6 +21,10 @@ from config.app_config import (
 app = Flask(__name__)
 CORS(app, resources=CORS_CONFIG)
 
+# Ensure directories exist
+for color in LETTER_COLORS:
+    os.makedirs(os.path.join(LETTERS_DIR, color), exist_ok=True)
+
 def get_font():
     """Get system font for text rendering"""
     try:
@@ -46,6 +50,14 @@ def create_letter_image(char, font, size=IMAGE_SIZE):
     draw.text((x, y), char, fill=FONT_COLOR, font=font)
     return img.convert(IMAGE_MODE)
 
+@app.route('/')
+def home():
+    return jsonify({"status": "API is running"})
+
+@app.route('/api/health')
+def health():
+    return jsonify({"status": "healthy"})
+
 @app.route('/images/<path:filename>')
 def serve_image(filename):
     return send_from_directory(IMAGES_DIR, filename)
@@ -62,10 +74,6 @@ def save_letter():
         
         # Remove data URL prefix
         image_data = image_data.split(',')[1]
-        
-        # Create directory if it doesn't exist
-        for color in LETTER_COLORS:
-            os.makedirs(os.path.join(LETTERS_DIR, color), exist_ok=True)
         
         # Convert base64 to image and save
         img_data = base64.b64decode(image_data)
@@ -127,4 +135,5 @@ def render_handwriting():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)

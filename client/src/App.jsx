@@ -5,6 +5,24 @@ import './App.css';
 
 const LETTER_LIST = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
+const storage = {
+  saveLetter: (letter, imageData) => {
+    try {
+      localStorage.setItem(`letter-${letter}`, imageData);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  },
+  getLetter: (letter) => {
+    try {
+      return localStorage.getItem(`letter-${letter}`);
+    } catch (error) {
+      return null;
+    }
+  }
+};
+
 function App() {
   const [text, setText] = useState('');
   const [message, setMessage] = useState('');
@@ -31,77 +49,126 @@ function App() {
 
   const handleDrawingSave = async (imageData) => {
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SAVE_LETTER}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ letter: currentLetter, imageData })
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        setMessage(`Saved letter ${currentLetter}`);
-        
-        // Move to next letter
-        const nextIndex = letterIndex + 1;
-        if (nextIndex < LETTER_LIST.length) {
-          setLetterIndex(nextIndex);
-          setCurrentLetter(LETTER_LIST[nextIndex]);
-        } else {
-          setMessage('Completed all letters! Try rendering some text.');
+        // Save to localStorage first
+        const saved = storage.saveLetter(currentLetter, imageData);
+        if (!saved) {
+            setMessage('Error saving to local storage');
+            return;
         }
+
+        // Also save to server if available
+        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SAVE_LETTER}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ letter: currentLetter, imageData })
+        });
         
-        // Clear canvas
-        canvasRef.current?.clear();
-      } else {
-        setMessage(data.error || 'Error saving letter');
-      }
+        const data = await response.json();
+        if (data.success) {
+            setMessage(`Saved letter ${currentLetter}`);
+            
+            // Move to next letter
+            const nextIndex = letterIndex + 1;
+            if (nextIndex < LETTER_LIST.length) {
+                setLetterIndex(nextIndex);
+                setCurrentLetter(LETTER_LIST[nextIndex]);
+            } else {
+                setMessage('Completed all letters! Try rendering some text.');
+            }
+            
+            // Clear canvas
+            canvasRef.current?.clear();
+        } else {
+            setMessage(data.error || 'Error saving letter on server');
+        }
     } catch (error) {
-      setMessage('Error: ' + error.message);
+        // If server save fails, at least we have local storage backup
+        setMessage('Saved locally only. Server error: ' + error.message);
     }
   };
 
   const handleRender = async () => {
     if (!text.trim()) {
-      setMessage('Please enter some text to render');
-      return;
+        setMessage('Please enter some text to render');
+        return;
     }
     
     try {
-      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.RENDER}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-      });
-      
-      const data = await response.json();
-      if (data.success) {
-        setRenderedHtml(data.html_content);
-        const container = document.getElementById('rendered-output');
-        if (container) {
-          const iframe = document.createElement('iframe');
-          iframeRef.current = iframe;
-          Object.assign(iframe.style, {
-            width: '100%',
-            height: '500px',
-            border: '1px solid #ccc',
-            borderRadius: '4px'
-          });
-          
-          container.innerHTML = '';
-          container.appendChild(iframe);
-          
-          const doc = iframe.contentDocument || iframe.contentWindow.document;
-          doc.open();
-          doc.write(data.html_content);
-          doc.close();
-          
-          setMessage('Handwriting rendered successfully');
+        // First try to render using locally stored letters
+        const letters = text.split('').map(letter => ({
+            letter,
+            imageData: storage.getLetter(letter)
+        }));
+
+        // Check if we have all letters locally
+        const missingLetters = letters.filter(l => !l.imageData);
+        if (missingLetters.length === 0) {
+            // We can render locally
+            // Create a canvas to combine the letters
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = letters.length * 100; // Adjust size as needed
+            canvas.height = 100;
+
+            // Draw each letter
+            let x = 0;
+            for (const { imageData } of letters) {
+                const img = new Image();
+                img.src = imageData;
+                await new Promise(resolve => {
+                    img.onload = () => {
+                        ctx.drawImage(img, x, 0);
+                        x += img.width;
+                        resolve();
+                    };
+                });
+            }
+
+            // Display the result
+            const container = document.getElementById('rendered-output');
+            if (container) {
+                container.innerHTML = '';
+                container.appendChild(canvas);
+            }
+            setMessage('Rendered using locally stored letters');
+            return;
         }
-      } else {
-        setMessage(data.error || 'Error rendering handwriting');
-      }
+
+        // If we don't have all letters locally, fall back to server
+        const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.RENDER}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            setRenderedHtml(data.html_content);
+            const container = document.getElementById('rendered-output');
+            if (container) {
+                const iframe = document.createElement('iframe');
+                Object.assign(iframe.style, {
+                    width: '100%',
+                    height: '500px',
+                    border: '1px solid #ccc',
+                    borderRadius: '4px'
+                });
+                
+                container.innerHTML = '';
+                container.appendChild(iframe);
+                
+                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                doc.open();
+                doc.write(data.html_content);
+                doc.close();
+                
+                setMessage('Rendered using server (some letters were not found locally)');
+            }
+        } else {
+            setMessage(data.error || 'Error rendering handwriting');
+        }
     } catch (error) {
-      setMessage('Error: ' + error.message);
+        setMessage('Error: ' + error.message);
     }
   };
 

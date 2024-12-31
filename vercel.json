@@ -1,26 +1,25 @@
 {
     "version": 2,
+    "installCommand": "cd client && pnpm install",
+    "buildCommand": "cd client && pnpm build",
+    "outputDirectory": "client/dist",
     "builds": [
         {
             "src": "app.py",
             "use": "@vercel/python"
-        },
-        {
-            "src": "client/package.json",
-            "use": "@vercel/static-build",
-            "config": {
-                "distDir": "dist"
-            }
         }
     ],
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "app.py"
+            "dest": "/app.py"
+        },
+        {
+            "handle": "filesystem"
         },
         {
             "src": "/(.*)",
-            "dest": "client/dist/$1"
+            "dest": "/client/dist/$1"
         }
     ]
 }
