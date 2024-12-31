@@ -3,6 +3,10 @@
 Practice your manual handwriting skills. Then use the letters you've practiced to convert typed text into a handwritten format!
 . The application is built using Python, Pygame, and Pillow libraries.
 
+
+## Practice handwriting, and use all the letters you've practiced to create something touching
+I decided to practice my handwriting schools during medical school to be a more effective clinician. So I made an app that took my handwriting practice sets, and turn them into a way of writing handwritten letters.  
+
 ## Features
 
 - Converts typed text into a handwritten format.
