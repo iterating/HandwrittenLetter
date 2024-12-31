@@ -1,4 +1,7 @@
-flask
-python-dotenv
-Pillow
-flask-cors
+aws s3 sync dist s3://handwritten-app-frontend --acl public-read
+Flask==3.0.0
+Pillow==10.1.0
+python-dotenv==1.0.0
+flask-cors==4.0.0
+gunicorn==21.2.0
+boto3==1.34.7

@@ -46,3 +46,18 @@ The output is written to a file named output.html.
 - `images/`: Contains images used for rendering characters.
 - `input.txt`: Input text file containing the text to be converted.
 - `output.html`: The output file containing the rendered handwritten text.
+
+# Deployment
+To deploy the application on Elastic Beanstalk, follow these steps:
+
+1. Create a new Elastic Beanstalk application.
+2. Upload the application files to the Elastic Beanstalk environment.
+3. Configure the environment settings as needed.
+4. Deploy the application to the Elastic Beanstalk environment.
+
+Use the app from your browser [here](https://d1d1511mhtx39tb3.cloudfront.net)
+
+- Created an S3 bucket for hosting the frontend
+- Set up proper bucket policies for public access
+- Created a CloudFront distribution for secure HTTPS access
+- Updated the Vite configuration to use CloudFront in production

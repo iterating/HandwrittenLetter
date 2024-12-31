@@ -8,11 +8,16 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true
+        target: process.env.NODE_ENV === 'production'
+          ? 'http://handwritten-env.eba-szypw8be.us-west-2.elasticbeanstalk.com'
+          : 'http://localhost:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
       },
       '/images': {
-        target: 'http://localhost:5000',
+        target: process.env.NODE_ENV === 'production'
+          ? 'http://handwritten-env.eba-szypw8be.us-west-2.elasticbeanstalk.com'
+          : 'http://localhost:5000',
         changeOrigin: true
       }
     }
