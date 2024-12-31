@@ -1,15 +1,12 @@
 """CORS configuration for the application."""
+from .env_config import ALLOWED_ORIGINS
 
 CORS_CONFIG = {
     r"/api/*": {
-        "origins": [
-            "http://localhost:5173",  # Vite dev server
-            "http://localhost:5000",  # Flask dev server
-            "https://handwritten-pj7io8lay-jinns-projects-db18a994.vercel.app",  # Preview URL
-            "https://handwritten-48syy7v3g-jinns-projects-db18a994.vercel.app",  # Production URL
-            "https://handwritten.vercel.app"  # Root domain if configured
-        ],
+        "origins": ALLOWED_ORIGINS,
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
+        "allow_headers": ["Content-Type"],
+        "supports_credentials": True,
+        "allow_origin_regex": r"https://handwritten-[a-zA-Z0-9-]+\.vercel\.app"  # Allows any Vercel preview URL
     }
 }
