@@ -1,29 +1,41 @@
 from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 import os
 from PIL import Image, ImageDraw, ImageFont
 import base64
 import io
-
-# Setup paths and constants
-IMAGES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), 'images'))
-LETTER_SETS_DIR = os.path.join(IMAGES_DIR, "letters")
-LETTER_COLORS = ("blue", "black")
+import json
+from config.cors_config import CORS_CONFIG
+from config.app_config import (
+    LETTER_COLORS,
+    FONT_SIZE,
+    FONT_COLOR,
+    IMAGE_MODE,
+    IMAGE_SIZE,
+    IMAGE_BACKGROUND,
+    LETTERS_DIR,
+    IMAGES_DIR,
+    LETTER_SETS_DIR
+)
 
 app = Flask(__name__)
+CORS(app, resources=CORS_CONFIG)
 
 def get_font():
     """Get system font for text rendering"""
     try:
-        return ImageFont.truetype("C:/Windows/Fonts/arial.ttf", 30)
+        # Try to use Arial font
+        return ImageFont.truetype("arial.ttf", FONT_SIZE)
     except:
+        # Fallback to default font
         return ImageFont.load_default()
 
-def create_letter_image(char, font, size=(30, 40)):
+def create_letter_image(char, font, size=IMAGE_SIZE):
     """Create a centered letter image"""
     if char == ' ':
-        return Image.new('L', size, 'white')
+        return Image.new(IMAGE_MODE, size, IMAGE_BACKGROUND)
         
-    img = Image.new('RGB', size, 'white')
+    img = Image.new(IMAGE_MODE, size, IMAGE_BACKGROUND)
     draw = ImageDraw.Draw(img)
     
     # Center the character
@@ -31,8 +43,8 @@ def create_letter_image(char, font, size=(30, 40)):
     x = (size[0] - (bbox[2] - bbox[0])) // 2
     y = (size[1] - (bbox[3] - bbox[1])) // 2
     
-    draw.text((x, y), char, fill='black', font=font)
-    return img.convert('L')
+    draw.text((x, y), char, fill=FONT_COLOR, font=font)
+    return img.convert(IMAGE_MODE)
 
 @app.route('/images/<path:filename>')
 def serve_image(filename):
@@ -41,37 +53,36 @@ def serve_image(filename):
 @app.route('/api/save-letter', methods=['POST'])
 def save_letter():
     try:
-        data = request.json
-        letter = data['letter']
-        image_data = data['imageData'].split(',')[1]  # Remove data URL prefix
+        data = request.get_json()
+        letter = data.get('letter')
+        image_data = data.get('imageData')
         
-        # Convert base64 to image
-        image_bytes = base64.b64decode(image_data)
-        image = Image.open(io.BytesIO(image_bytes))
+        if not letter or not image_data:
+            return jsonify({"success": False, "error": "Missing letter or image data"}), 400
         
-        # Convert to grayscale
-        image = image.convert('L')
+        # Remove data URL prefix
+        image_data = image_data.split(',')[1]
         
-        # Save for both colors
+        # Create directory if it doesn't exist
         for color in LETTER_COLORS:
-            # Ensure directory exists
-            letter_dir = os.path.join(LETTER_SETS_DIR, 'set1', color)
-            os.makedirs(letter_dir, exist_ok=True)
-            
-            # Save image
-            output_path = os.path.join(letter_dir, f'{ord(letter)}.png')
-            image.save(output_path)
-            print(f"Saved {letter} to {output_path}")
+            os.makedirs(os.path.join(LETTERS_DIR, color), exist_ok=True)
         
-        return jsonify({'success': True})
+        # Convert base64 to image and save
+        img_data = base64.b64decode(image_data)
+        img = Image.open(io.BytesIO(img_data))
+        
+        # Save for each color
+        for color in LETTER_COLORS:
+            img.save(os.path.join(LETTERS_DIR, color, f"{ord(letter)}.png"))
+        
+        return jsonify({"success": True})
     except Exception as e:
-        print(f"Error saving letter: {str(e)}")
-        return jsonify({'error': str(e)}), 500
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/api/generate-test-dataset', methods=['POST'])
 def generate_test_dataset():
     try:
-        data = request.json
+        data = request.get_json()
         letterlist = data.get('letterlist', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
         font = get_font()
         
@@ -90,7 +101,7 @@ def generate_test_dataset():
 @app.route('/api/render', methods=['POST'])
 def render_handwriting():
     try:
-        text = request.json.get('text', '').strip()
+        text = request.get_json().get('text', '').strip()
         if not text:
             return jsonify({'error': 'No text provided'}), 400
             

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import DrawingCanvas from './components/DrawingCanvas';
+import { API_BASE_URL, API_ENDPOINTS } from './config/api';
 import './App.css';
 
 const LETTER_LIST = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -15,7 +16,7 @@ function App() {
   
   const generateTestDataset = async () => {
     try {
-      const response = await fetch('/api/generate-test-dataset', {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.GENERATE_TEST_DATASET}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ letterlist: LETTER_LIST })
@@ -30,7 +31,7 @@ function App() {
 
   const handleDrawingSave = async (imageData) => {
     try {
-      const response = await fetch('/api/save-letter', {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.SAVE_LETTER}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ letter: currentLetter, imageData })
@@ -66,7 +67,7 @@ function App() {
     }
     
     try {
-      const response = await fetch('/api/render', {
+      const response = await fetch(`${API_BASE_URL}${API_ENDPOINTS.RENDER}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })
