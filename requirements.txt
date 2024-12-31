@@ -1,4 +1,4 @@
-flask
-python-dotenv
-Pillow
-flask-cors
+flask==3.0.0
+python-dotenv==1.0.0
+Pillow==10.1.0
+flask-cors==4.0.0

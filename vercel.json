@@ -4,12 +4,23 @@
         {
             "src": "app.py",
             "use": "@vercel/python"
+        },
+        {
+            "src": "client/package.json",
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "dist"
+            }
         }
     ],
     "routes": [
         {
-            "src": "/(.*)",
+            "src": "/api/(.*)",
             "dest": "app.py"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "client/dist/$1"
         }
     ]
 }
