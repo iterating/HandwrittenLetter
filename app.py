@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify, send_from_directory
 import os
 from PIL import Image, ImageDraw, ImageFont
+import base64
+import io
 
 # Setup paths and constants
 IMAGES_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), 'images'))
@@ -35,6 +37,36 @@ def create_letter_image(char, font, size=(30, 40)):
 @app.route('/images/<path:filename>')
 def serve_image(filename):
     return send_from_directory(IMAGES_DIR, filename)
+
+@app.route('/api/save-letter', methods=['POST'])
+def save_letter():
+    try:
+        data = request.json
+        letter = data['letter']
+        image_data = data['imageData'].split(',')[1]  # Remove data URL prefix
+        
+        # Convert base64 to image
+        image_bytes = base64.b64decode(image_data)
+        image = Image.open(io.BytesIO(image_bytes))
+        
+        # Convert to grayscale
+        image = image.convert('L')
+        
+        # Save for both colors
+        for color in LETTER_COLORS:
+            # Ensure directory exists
+            letter_dir = os.path.join(LETTER_SETS_DIR, 'set1', color)
+            os.makedirs(letter_dir, exist_ok=True)
+            
+            # Save image
+            output_path = os.path.join(letter_dir, f'{ord(letter)}.png')
+            image.save(output_path)
+            print(f"Saved {letter} to {output_path}")
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error saving letter: {str(e)}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/generate-test-dataset', methods=['POST'])
 def generate_test_dataset():

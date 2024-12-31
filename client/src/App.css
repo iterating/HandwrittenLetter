@@ -3,6 +3,7 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  color: #000000;
 }
 
 .logo {
@@ -35,52 +36,51 @@
 
 .card {
   padding: 2em;
+  color: #000000;
 }
 
 .read-the-docs {
-  color: #888;
+  color: #000000;
 }
 
 .app {
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
+  color: #000000;
 }
 
-.current-letter {
+h1, h2 {
+  margin-bottom: 1rem;
+  color: #000000;
+}
+
+.drawing-section {
   margin: 2rem 0;
-  padding: 1rem;
-  background-color: #f5f5f5;
+  padding: 2rem;
+  background-color: #f8f9fa;
   border-radius: 8px;
 }
 
-.current-letter h2 {
-  margin: 0;
-  color: #000000;
+.current-letter {
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.current-letter strong {
   font-size: 2rem;
+  color: #000000;
 }
 
 .progress {
-  margin: 0.5rem 0 0;
   color: #000000;
-  font-size: 1rem;
-}
-
-.drawing-canvas-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 2rem 0;
-}
-
-.canvas-controls {
-  margin-top: 1rem;
-  display: flex;
-  gap: 1rem;
+  font-size: 0.9rem;
 }
 
 .actions {
   margin: 2rem 0;
+  display: flex;
+  justify-content: center;
 }
 
 .text-input {
@@ -95,6 +95,12 @@
   font-size: 1rem;
   margin-bottom: 1rem;
   resize: vertical;
+  color: #000000;
+  background-color: #ffffff;
+}
+
+.text-input textarea::placeholder {
+  color: #666666;
 }
 
 .text-actions {
@@ -121,27 +127,41 @@ button:hover {
 .rendered-output {
   margin: 2rem 0;
   padding: 1rem;
-  background-color: #fff;
+  background-color: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   min-height: 500px;
-}
-
-.rendered-output iframe {
-  display: block;
-  margin: 0 auto;
-  background-color: #fff;
 }
 
 .message {
   margin: 1rem 0;
   padding: 1rem;
   border-radius: 4px;
-  background-color: #f0f0f0;
-  color: #333;
+  background-color: #ffffff;
+  color: #000000;
+  text-align: center;
+  border: 1px solid #ccc;
 }
 
-.message.error {
-  background-color: #ffebee;
-  color: #000000;
+.drawing-canvas-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 2rem 0;
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.canvas-controls {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+canvas {
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
