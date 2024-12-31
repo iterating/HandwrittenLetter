@@ -1,0 +1,4 @@
+flask
+python-dotenv
+Pillow
+flask-cors
