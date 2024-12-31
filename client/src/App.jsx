@@ -9,7 +9,9 @@ function App() {
   const [message, setMessage] = useState('');
   const [currentLetter, setCurrentLetter] = useState(LETTER_LIST[0]);
   const [letterIndex, setLetterIndex] = useState(0);
+  const [renderedHtml, setRenderedHtml] = useState('');
   const canvasRef = useRef(null);
+  const iframeRef = useRef(null);
   
   const generateTestDataset = async () => {
     try {
@@ -72,9 +74,11 @@ function App() {
       
       const data = await response.json();
       if (data.success) {
+        setRenderedHtml(data.html_content);
         const container = document.getElementById('rendered-output');
         if (container) {
           const iframe = document.createElement('iframe');
+          iframeRef.current = iframe;
           Object.assign(iframe.style, {
             width: '100%',
             height: '500px',
@@ -97,6 +101,25 @@ function App() {
       }
     } catch (error) {
       setMessage('Error: ' + error.message);
+    }
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      if (!renderedHtml) {
+        setMessage('Please render some text first');
+        return;
+      }
+
+      const iframe = iframeRef.current;
+      if (iframe) {
+        const doc = iframe.contentDocument || iframe.contentWindow.document;
+        const content = doc.body.innerHTML;
+        await navigator.clipboard.writeText(content);
+        setMessage('Copied to clipboard!');
+      }
+    } catch (error) {
+      setMessage('Error copying to clipboard: ' + error.message);
     }
   };
 
@@ -130,6 +153,9 @@ function App() {
         <div className="text-actions">
           <button onClick={handleRender} className="render-button">
             Render Handwriting
+          </button>
+          <button onClick={copyToClipboard} className="copy-button">
+            Copy to Clipboard
           </button>
         </div>
       </div>
