@@ -7,12 +7,15 @@ from PIL import Image, ImageDraw
 import base64
 import io
 import logging
-from handwrite import create_letter
-from handwriteRender import generate_output
+from handwrite import create_letter, check_directory
+import pygame
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+# Initialize Pygame
+pygame.init()
 
 # Configuration
 IMAGE_MODE = "RGB"
@@ -39,13 +42,14 @@ CORS(app, resources=CORS_CONFIG)
 
 @app.before_request
 def log_request_info():
-    logger.debug('Headers: %s', request.headers)
-    logger.debug('Body: %s', request.get_data())
+    logger.info('Headers: %s', request.headers)
+    logger.info('Body: %s', request.get_data())
 
 def create_letter_image(char, size=IMAGE_SIZE):
-    """Create a simple letter image"""
     try:
-        # Create new image
+        logger.info(f"Creating image for character: {char}")
+        
+        # Create new image with white background
         img = Image.new(IMAGE_MODE, size, IMAGE_BACKGROUND)
         draw = ImageDraw.Draw(img)
         
@@ -75,13 +79,29 @@ def save_letter():
         if not letter or not image_data:
             logger.error("Missing required fields")
             return jsonify({'error': 'Missing letter or image data'}), 400
+
+        # Remove data:image/png;base64, prefix if present
+        if 'base64,' in image_data:
+            image_data = image_data.split('base64,')[1]
             
-        logger.info(f"Successfully processed letter: {letter}")
+        # Convert base64 to image
+        image_bytes = base64.b64decode(image_data)
+        image = Image.open(io.BytesIO(image_bytes))
         
-        # In serverless environment, we'll just acknowledge receipt
+        # Ensure directories exist
+        check_directory()
+        
+        # Save image in both blue and black versions
+        for color in ['blue', 'black']:
+            img_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
+                                  f'../client/public/images/letters/set1/{color}/{ord(letter)}.png')
+            os.makedirs(os.path.dirname(img_path), exist_ok=True)
+            image.save(img_path)
+            logger.info(f"Saved {color} version to {img_path}")
+            
         return jsonify({
             'success': True,
-            'message': f'Processed letter {letter}'
+            'message': f'Saved letter {letter} successfully'
         })
     except Exception as e:
         logger.error(f"Error in save_letter: {str(e)}")
