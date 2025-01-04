@@ -7,11 +7,7 @@
         },
         {
             "src": "client/package.json",
-            "use": "@vercel/static-build",
-            "config": {
-                "zeroInstalls": true,
-                "outputDirectory": "client/dist"
-            }
+            "use": "@vercel/static-build"
         }
     ],
     "routes": [
@@ -24,7 +20,7 @@
         },
         {
             "src": "/(.*)",
-            "dest": "client/dist/index.html"
+            "dest": "/client/dist/index.html"
         }
     ]
 }

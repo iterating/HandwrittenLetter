@@ -12,7 +12,7 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: '/vercel/path0/client/dist',
+    outDir: 'dist',
     emptyOutDir: true
   }
 })
