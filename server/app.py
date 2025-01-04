@@ -4,16 +4,28 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 import base64
 import io
-import json
-from config.cors_config import CORS_CONFIG
-from config.app_config import (
-    LETTER_COLORS,
-    FONT_SIZE,
-    FONT_COLOR,
-    IMAGE_MODE,
-    IMAGE_SIZE,
-    IMAGE_BACKGROUND
-)
+
+# Configuration
+FONT_SIZE = 128
+FONT_COLOR = "black"
+IMAGE_MODE = "RGB"
+IMAGE_SIZE = (200, 200)
+IMAGE_BACKGROUND = "white"
+LETTER_COLORS = ["black"]
+
+# CORS Configuration
+default_origins = ['https://handwrittenletter.vercel.app']
+ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',') or default_origins
+if os.getenv('FLASK_ENV') == 'development':
+    ALLOWED_ORIGINS.extend(['http://localhost:5173', 'http://127.0.0.1:5173'])
+
+CORS_CONFIG = {
+    r"/api/*": {
+        "origins": ALLOWED_ORIGINS,
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+}
 
 app = Flask(__name__)
 CORS(app, resources=CORS_CONFIG)
