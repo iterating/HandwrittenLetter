@@ -3,32 +3,28 @@
     "builds": [
         {
             "src": "server/app.py",
-            "use": "@vercel/python",
-            "config": {
-                "maxLambdaSize": "15mb"
-            }
+            "use": "@vercel/python"
         },
         {
             "src": "client/package.json",
             "use": "@vercel/static-build",
             "config": {
-                "distDir": "dist",
-                "buildCommand": "cd client && pnpm install && vite build && mv dist ../dist"
+                "buildCommand": "cd client && pnpm install && pnpm run build",
+                "outputDirectory": "client/dist"
             }
         }
     ],
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/server/app.py"
+            "dest": "server/app.py"
         },
         {
             "handle": "filesystem"
         },
         {
             "src": "/(.*)",
-            "dest": "/dist/index.html",
-            "continue": true
+            "dest": "client/dist/index.html"
         }
     ]
 }
