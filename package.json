@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "cd client && pnpm dev",
     "build": "cd client && pnpm build",
-    "vercel-build": "cd client && pnpm build",
+    "vercel-build": "cd client && pnpm install --no-frozen-lockfile && pnpm build",
     "start": "cd server && python app.py"
   },
   "workspaces": [
-    "client"
+    "client",
+    "server"
   ]
 }

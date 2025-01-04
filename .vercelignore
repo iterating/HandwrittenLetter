@@ -1,0 +1,10 @@
+.elasticbeanstalk
+.env
+**/node_modules
+**/dist
+**/.git
+README.md
+.gitignore
+**/*.pyc
+**/__pycache__
+**/venv
