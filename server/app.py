@@ -51,9 +51,10 @@ def create_letter_image(char, font, size=IMAGE_SIZE):
         draw = ImageDraw.Draw(img)
         
         if font:
-            # Get text size
-            text_width = draw.textlength(char, font=font)
-            _, text_height = draw.textsize(char, font=font)
+            # Get text size using font.getbbox
+            bbox = font.getbbox(char)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
             
             # Calculate position to center text
             x = (size[0] - text_width) / 2
