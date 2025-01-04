@@ -17,7 +17,7 @@ ADDITIONAL_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',') if os.getenv('A
 # Vercel deployment patterns
 VERCEL_PATTERNS = [
     "https://handwritten-*.vercel.app",  # Preview deployments
-    "https://handwritten.vercel.app",    # Production deployment
+    "https://handwrittenletter.vercel.app",    # Production deployment
 ]
 
 # Combine all allowed origins
