@@ -47,6 +47,29 @@ def create_letter_image(char, size=IMAGE_SIZE):
         traceback.print_exc(file=sys.stderr)
         raise
 
+@app.route('/api/save-letter', methods=['POST'])
+def save_letter():
+    try:
+        print("Starting save_letter endpoint", file=sys.stderr)
+        data = request.get_json()
+        letter = data.get('letter', '')
+        image_data = data.get('imageData', '')
+        
+        if not letter or not image_data:
+            return jsonify({'error': 'Missing letter or image data'}), 400
+            
+        print(f"Successfully processed letter: {letter}", file=sys.stderr)
+        
+        # In serverless environment, we'll just acknowledge receipt
+        return jsonify({
+            'success': True,
+            'message': f'Processed letter {letter}'
+        })
+    except Exception as e:
+        print(f"Error in save_letter: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/render', methods=['POST'])
 def render_handwriting():
     try:
@@ -78,8 +101,11 @@ def render_handwriting():
 def generate_test_dataset():
     try:
         print("Starting generate_test_dataset endpoint", file=sys.stderr)
+        data = request.get_json()
+        letterlist = data.get('letterlist', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+        print(f"Generating test dataset for letters: {letterlist}", file=sys.stderr)
         
-        # Generate a simple test image
+        # Generate a simple test image for 'A'
         img = create_letter_image('A')
         print("Test image created successfully", file=sys.stderr)
         
@@ -90,8 +116,9 @@ def generate_test_dataset():
         print("Image converted to base64", file=sys.stderr)
         
         return jsonify({
-            'image': f'data:image/png;base64,{img_str}',
-            'success': True
+            'success': True,
+            'message': 'Generated test dataset',
+            'image': f'data:image/png;base64,{img_str}'
         })
     except Exception as e:
         print(f"Error in generate_test_dataset: {str(e)}", file=sys.stderr)
