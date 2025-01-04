@@ -13,12 +13,13 @@ DRAW_HEIGHT = 300
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
-# Initialize Pygame
+# Initialize Pygame and load brush image
 try:
     pygame.init()
 except pygame.error as e:
     print(f"Error: {e}")
     sys.exit()
+brush = pygame.transform.scale(pygame.image.load("../client/public/images/brush.png"), (15, 15))
 
 # Set up the display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -59,13 +60,12 @@ txt4 = txtfont.render("Edit Previous", True, BLACK)
 
 # Setup initial display
 screen.blit(mydraw, (10, 10))
-brush = pygame.transform.scale(pygame.image.load("client/public/images/brush.png"), (15, 15))
 pygame.display.update()
 clock = pygame.time.Clock()
 
 # Variables
 z = 0
-actdirectory = "client/public/images/letters"
+actdirectory = "../client/public/images/letters"
 no_set = 0
 actset = 0
 letter_act_index = 0
@@ -82,14 +82,14 @@ def check_directory():
     """Check if the directory exists and create it if it doesn't"""
     global actdirectory, no_set, actset
     try:
-        cdir = os.listdir("client/public/images/letters")
+        cdir = os.listdir("../client/public/images/letters")
         no_set = len(cdir)
         actset = no_set + 1
-        actdirectory = f"client/public/images/letters/set{actset}"
+        actdirectory = f"../client/public/images/letters/set{actset}"
     except:
-        os.mkdir("client/public/images/letters")
+        os.mkdir("../client/public/images/letters")
         actset = 1
-        actdirectory = f"client/public/images/letters/set{actset}"
+        actdirectory = f"../client/public/images/letters/set{actset}"
     os.mkdir(actdirectory)
     os.mkdir(actdirectory + "/blue")
     os.mkdir(actdirectory + "/black")

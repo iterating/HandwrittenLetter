@@ -7,6 +7,8 @@ from PIL import Image, ImageDraw
 import base64
 import io
 import logging
+from handwrite import create_letter
+from handwriteRender import generate_output
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
