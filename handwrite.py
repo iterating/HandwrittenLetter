@@ -59,13 +59,13 @@ txt4 = txtfont.render("Edit Previous", True, BLACK)
 
 # Setup initial display
 screen.blit(mydraw, (10, 10))
-brush = pygame.transform.scale(pygame.image.load("images/brush.png"), (15, 15))
+brush = pygame.transform.scale(pygame.image.load("client/public/images/brush.png"), (15, 15))
 pygame.display.update()
 clock = pygame.time.Clock()
 
 # Variables
 z = 0
-actdirectory = "images/letters"
+actdirectory = "client/public/images/letters"
 no_set = 0
 actset = 0
 letter_act_index = 0
@@ -81,22 +81,18 @@ def render_display():
 def check_directory():
     """Check if the directory exists and create it if it doesn't"""
     global actdirectory, no_set, actset
-    sdir = os.path.isdir(actdirectory)
-    if sdir:
-        cdir = os.listdir("images/letters")
+    try:
+        cdir = os.listdir("client/public/images/letters")
         no_set = len(cdir)
         actset = no_set + 1
-        actdirectory = f"images/letters/set{actset}"
-        os.mkdir(actdirectory)
-        os.mkdir(actdirectory + "/blue")
-        os.mkdir(actdirectory + "/black")
-    else:
-        os.mkdir("images/letters")
+        actdirectory = f"client/public/images/letters/set{actset}"
+    except:
+        os.mkdir("client/public/images/letters")
         actset = 1
-        actdirectory = f"images/letters/set{actset}"
-        os.mkdir(actdirectory)
-        os.mkdir(actdirectory + "/blue")
-        os.mkdir(actdirectory + "/black")
+        actdirectory = f"client/public/images/letters/set{actset}"
+    os.mkdir(actdirectory)
+    os.mkdir(actdirectory + "/blue")
+    os.mkdir(actdirectory + "/black")
 
 def create_letter():
     """Save the current letter as a PNG image and create a new letter"""

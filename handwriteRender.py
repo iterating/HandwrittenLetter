@@ -1,8 +1,8 @@
 import os
 import random
 
-LETTER_SETS_DIR = "images/letters"
-BACKGROUND_IMAGE = "images/background.png"
+LETTER_SETS_DIR = "client/public/images/letters"
+BACKGROUND_IMAGE = "client/public/images/background.png"
 OUTPUT_FILE = "output.html"
 INPUT_FILE = "input.txt"
 
@@ -59,4 +59,3 @@ def generate_output():
         print(f"Error: {INPUT_FILE} not found.")
 
 generate_output()
-
