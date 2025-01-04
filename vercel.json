@@ -9,8 +9,7 @@
             "src": "client/package.json",
             "use": "@vercel/static-build",
             "config": {
-                "buildCommand": "cd client && pnpm install && pnpm run build",
-                "outputDirectory": "client/dist"
+                "distDir": "client/dist"
             }
         }
     ],
@@ -18,10 +17,6 @@
         {
             "src": "/api/(.*)",
             "dest": "server/app.py"
-        },
-        {
-            "src": "/assets/(.*)",
-            "dest": "client/dist/assets/$1"
         },
         {
             "handle": "filesystem"
