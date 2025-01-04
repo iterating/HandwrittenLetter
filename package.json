@@ -1,0 +1,14 @@
+{
+  "name": "handwritten",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@8.9.0",
+  "scripts": {
+    "dev": "cd client && pnpm dev",
+    "build": "cd client && pnpm build",
+    "start": "cd server && python app.py"
+  },
+  "workspaces": [
+    "client"
+  ]
+}
