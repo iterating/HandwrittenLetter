@@ -2,8 +2,11 @@
     "version": 2,
     "builds": [
         {
-            "src": "app.py",
-            "use": "@vercel/python"
+            "src": "server/app.py",
+            "use": "@vercel/python",
+            "config": {
+                "maxLambdaSize": "15mb"
+            }
         },
         {
             "src": "client/package.json",
@@ -17,14 +20,15 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/app.py"
+            "dest": "/server/app.py"
         },
         {
             "handle": "filesystem"
         },
         {
             "src": "/(.*)",
-            "dest": "/dist/$1"
+            "dest": "/dist/index.html",
+            "continue": true
         }
     ]
 }
