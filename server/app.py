@@ -3,17 +3,15 @@ from flask_cors import CORS
 import os
 import sys
 import traceback
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 import base64
 import io
 
 # Configuration
-FONT_SIZE = 48  # Reduced font size for better centering
-FONT_COLOR = "black"
 IMAGE_MODE = "RGB"
 IMAGE_SIZE = (200, 200)
 IMAGE_BACKGROUND = "white"
-LETTER_COLORS = ["black"]
+FONT_COLOR = "black"
 
 # CORS Configuration
 default_origins = ['https://handwrittenletter.vercel.app']
@@ -32,30 +30,15 @@ CORS_CONFIG = {
 app = Flask(__name__)
 CORS(app, resources=CORS_CONFIG)
 
-def get_font():
-    """Get system font for text rendering"""
+def create_letter_image(char, size=IMAGE_SIZE):
+    """Create a simple letter image"""
     try:
-        # Use default font in serverless environment
-        font = ImageFont.load_default()
-        print("Successfully loaded default font", file=sys.stderr)
-        return font
-    except Exception as e:
-        print(f"Error loading font: {str(e)}", file=sys.stderr)
-        traceback.print_exc(file=sys.stderr)
-        return None
-
-def create_letter_image(char, font, size=IMAGE_SIZE):
-    """Create a centered letter image"""
-    try:
+        # Create new image
         img = Image.new(IMAGE_MODE, size, IMAGE_BACKGROUND)
         draw = ImageDraw.Draw(img)
         
-        # Simple centering - draw at the middle of the image
-        x = size[0] // 2
-        y = size[1] // 2
-        
-        # Draw text centered at (x, y)
-        draw.text((x, y), char, font=font, fill=FONT_COLOR, anchor="mm")
+        # Draw text at fixed position
+        draw.text((size[0]//3, size[1]//3), char, fill=FONT_COLOR)
         
         print(f"Successfully created image for character: {char}", file=sys.stderr)
         return img
@@ -72,12 +55,8 @@ def render_handwriting():
         text = data.get('text', '')
         print(f"Received text: {text}", file=sys.stderr)
         
-        # Get font
-        font = get_font()
-        print(f"Font loaded: {font is not None}", file=sys.stderr)
-        
         # Create image for text
-        img = create_letter_image(text[0] if text else 'A', font)
+        img = create_letter_image(text[0] if text else 'A')
         print("Image created successfully", file=sys.stderr)
         
         # Convert to base64
@@ -99,11 +78,9 @@ def render_handwriting():
 def generate_test_dataset():
     try:
         print("Starting generate_test_dataset endpoint", file=sys.stderr)
-        # Generate a single test image
-        font = get_font()
-        print(f"Font loaded: {font is not None}", file=sys.stderr)
         
-        img = create_letter_image('A', font)
+        # Generate a simple test image
+        img = create_letter_image('A')
         print("Test image created successfully", file=sys.stderr)
         
         # Convert to base64
