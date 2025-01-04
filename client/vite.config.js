@@ -12,12 +12,7 @@ export default defineConfig({
     }
   },
   build: {
-    outDir: 'dist',
-    emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        manualChunks: undefined
-      }
-    }
+    outDir: '/vercel/path0/client/dist',
+    emptyOutDir: true
   }
 })
