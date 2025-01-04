@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "vercel-build": "vite build --emptyOutDir",
+    "build": "vite build --outDir /vercel/output/static",
+    "vercel-build": "vite build --outDir /vercel/output/static",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
