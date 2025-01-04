@@ -1,77 +1,75 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
-from PIL import Image, ImageDraw, ImageFont
+import sys
+import traceback
+from PIL import Image, ImageDraw
 import base64
 import io
 
+app = Flask(__name__)
+CORS(app)
+
 # Configuration
-FONT_SIZE = 128
-FONT_COLOR = "black"
 IMAGE_MODE = "RGB"
 IMAGE_SIZE = (200, 200)
 IMAGE_BACKGROUND = "white"
-LETTER_COLORS = ["black"]
+FONT_COLOR = "black"
 
-# CORS Configuration
-default_origins = ['https://handwrittenletter.vercel.app']
-ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',') or default_origins
-if os.getenv('FLASK_ENV') == 'development':
-    ALLOWED_ORIGINS.extend(['http://localhost:5173', 'http://127.0.0.1:5173'])
-
-CORS_CONFIG = {
-    r"/api/*": {
-        "origins": ALLOWED_ORIGINS,
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-}
-
-app = Flask(__name__)
-CORS(app, resources=CORS_CONFIG)
-
-def get_font():
-    """Get system font for text rendering"""
+def create_letter_image(char, size=IMAGE_SIZE):
+    """Create a simple letter image"""
     try:
-        # Use default font in serverless environment
-        return ImageFont.load_default()
-    except:
-        # Fallback to creating a basic font
-        return None
+        # Create new image with white background
+        img = Image.new(IMAGE_MODE, size, IMAGE_BACKGROUND)
+        draw = ImageDraw.Draw(img)
+        
+        # Draw text at center position
+        x = size[0] // 2
+        y = size[1] // 2
+        draw.text((x, y), char, fill=FONT_COLOR)
+        
+        return img
+    except Exception as e:
+        print(f"Error creating letter image: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        raise
 
-def create_letter_image(char, font, size=IMAGE_SIZE):
-    """Create a centered letter image"""
-    img = Image.new(IMAGE_MODE, size, IMAGE_BACKGROUND)
-    draw = ImageDraw.Draw(img)
-    
-    if font:
-        # Get text size
-        text_width = draw.textlength(char, font=font)
-        _, text_height = draw.textsize(char, font=font)
+@app.route('/api/save-letter', methods=['POST'])
+def save_letter():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data received'}), 400
+            
+        letter = data.get('letter', '')
+        image_data = data.get('imageData', '')
         
-        # Calculate position to center text
-        x = (size[0] - text_width) / 2
-        y = (size[1] - text_height) / 2
-        
-        # Draw text
-        draw.text((x, y), char, font=font, fill=FONT_COLOR)
-    else:
-        # Fallback to basic text rendering
-        draw.text((size[0]/4, size[1]/4), char, fill=FONT_COLOR)
-    
-    return img
+        if not letter or not image_data:
+            return jsonify({'error': 'Missing letter or image data'}), 400
+            
+        # Just acknowledge receipt in serverless environment
+        return jsonify({
+            'success': True,
+            'message': f'Processed letter {letter}'
+        })
+    except Exception as e:
+        print(f"Error in save_letter: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/render', methods=['POST'])
 def render_handwriting():
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data received'}), 400
+            
         text = data.get('text', '')
-        
-        # Get font
-        font = get_font()
-        
-        # Create image for text
-        img = create_letter_image(text[0] if text else 'A', font)
+        if not text:
+            return jsonify({'error': 'No text provided'}), 400
+            
+        # Create image for first character
+        img = create_letter_image(text[0])
         
         # Convert to base64
         buffered = io.BytesIO()
@@ -83,14 +81,19 @@ def render_handwriting():
             'text': text
         })
     except Exception as e:
+        print(f"Error in render_handwriting: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/generate-test-dataset', methods=['POST'])
 def generate_test_dataset():
     try:
-        # Generate a single test image
-        font = get_font()
-        img = create_letter_image('A', font)
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data received'}), 400
+            
+        # Generate a test image for 'A'
+        img = create_letter_image('A')
         
         # Convert to base64
         buffered = io.BytesIO()
@@ -98,11 +101,18 @@ def generate_test_dataset():
         img_str = base64.b64encode(buffered.getvalue()).decode()
         
         return jsonify({
-            'image': f'data:image/png;base64,{img_str}',
-            'success': True
+            'success': True,
+            'message': 'Generated test dataset',
+            'image': f'data:image/png;base64,{img_str}'
         })
     except Exception as e:
+        print(f"Error in generate_test_dataset: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
         return jsonify({'error': str(e)}), 500
 
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({'status': 'healthy'})
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

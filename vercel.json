@@ -3,16 +3,13 @@
     "builds": [
         {
             "src": "server/app.py",
-            "use": "@vercel/python",
-            "config": {
-                "maxLambdaSize": "15mb"
-            }
+            "use": "@vercel/python"
         },
         {
             "src": "client/package.json",
             "use": "@vercel/static-build",
             "config": {
-                "outputDirectory": "."
+                "distDir": "dist"
             }
         }
     ],
@@ -26,7 +23,7 @@
         },
         {
             "src": "/(.*)",
-            "dest": "index.html"
+            "dest": "client/dist/index.html"
         }
     ]
 }
