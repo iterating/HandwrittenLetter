@@ -3,11 +3,7 @@
     "builds": [
         {
             "src": "server/app.py",
-            "use": "@vercel/python",
-            "config": {
-                "maxLambdaSize": "15mb",
-                "runtime": "python3.9"
-            }
+            "use": "@vercel/python"
         },
         {
             "src": "client/package.json",
@@ -20,20 +16,14 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "methods": ["GET", "POST", "OPTIONS"],
             "dest": "server/app.py"
         },
         {
-            "src": "/(.*)",
-            "dest": "client/dist/$1",
-            "continue": true
+            "handle": "filesystem"
         },
         {
             "src": "/(.*)",
             "dest": "client/dist/index.html"
         }
-    ],
-    "env": {
-        "FLASK_ENV": "production"
-    }
+    ]
 }
