@@ -9,7 +9,10 @@ import io
 import logging
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 # Configuration
@@ -19,26 +22,28 @@ IMAGE_BACKGROUND = "white"
 FONT_COLOR = "black"
 
 # CORS Configuration
-default_origins = ['https://handwrittenletter.vercel.app']
-ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',') or default_origins
-if os.getenv('FLASK_ENV') == 'development':
-    ALLOWED_ORIGINS.extend(['http://localhost:5173', 'http://127.0.0.1:5173'])
+ALLOWED_ORIGINS = [
+    'https://handwrittenletter.vercel.app',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+]
 
-CORS_CONFIG = {
-    r"/api/*": {
+app = Flask(__name__)
+CORS(app, resources={
+    r"/*": {
         "origins": ALLOWED_ORIGINS,
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type"]
     }
-}
-
-app = Flask(__name__)
-CORS(app, resources=CORS_CONFIG)
+})
 
 @app.before_request
 def log_request_info():
-    logger.debug('Headers: %s', request.headers)
-    logger.debug('Body: %s', request.get_data())
+    logger.debug('Headers: %s', dict(request.headers))
+    logger.debug('Method: %s', request.method)
+    logger.debug('URL: %s', request.url)
+    if request.is_json:
+        logger.debug('JSON Body: %s', request.get_json())
 
 def create_letter_image(char, size=IMAGE_SIZE):
     """Create a simple letter image"""
@@ -57,12 +62,18 @@ def create_letter_image(char, size=IMAGE_SIZE):
         logger.error(traceback.format_exc())
         raise
 
-@app.route('/api/save-letter', methods=['POST'])
+@app.route('/api/save-letter', methods=['POST', 'OPTIONS'])
 def save_letter():
+    if request.method == 'OPTIONS':
+        return '', 204
+        
     try:
         logger.info("Starting save_letter endpoint")
+        if not request.is_json:
+            logger.error("Request is not JSON")
+            return jsonify({'error': 'Content-Type must be application/json'}), 400
+            
         data = request.get_json()
-        
         if not data:
             logger.error("No JSON data received")
             return jsonify({'error': 'No data received'}), 400
@@ -76,7 +87,6 @@ def save_letter():
             
         logger.info(f"Successfully processed letter: {letter}")
         
-        # In serverless environment, we'll just acknowledge receipt
         return jsonify({
             'success': True,
             'message': f'Processed letter {letter}'
@@ -86,12 +96,18 @@ def save_letter():
         logger.error(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/render', methods=['POST'])
+@app.route('/api/render', methods=['POST', 'OPTIONS'])
 def render_handwriting():
+    if request.method == 'OPTIONS':
+        return '', 204
+        
     try:
         logger.info("Starting render_handwriting endpoint")
+        if not request.is_json:
+            logger.error("Request is not JSON")
+            return jsonify({'error': 'Content-Type must be application/json'}), 400
+            
         data = request.get_json()
-        
         if not data:
             logger.error("No JSON data received")
             return jsonify({'error': 'No data received'}), 400
@@ -118,12 +134,18 @@ def render_handwriting():
         logger.error(traceback.format_exc())
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/generate-test-dataset', methods=['POST'])
+@app.route('/api/generate-test-dataset', methods=['POST', 'OPTIONS'])
 def generate_test_dataset():
+    if request.method == 'OPTIONS':
+        return '', 204
+        
     try:
         logger.info("Starting generate_test_dataset endpoint")
+        if not request.is_json:
+            logger.error("Request is not JSON")
+            return jsonify({'error': 'Content-Type must be application/json'}), 400
+            
         data = request.get_json()
-        
         if not data:
             logger.error("No JSON data received")
             return jsonify({'error': 'No data received'}), 400
@@ -153,7 +175,10 @@ def generate_test_dataset():
 
 @app.route('/', methods=['GET'])
 def health_check():
-    return jsonify({'status': 'healthy'})
+    return jsonify({
+        'status': 'healthy',
+        'message': 'Flask server is running'
+    })
 
 if __name__ == '__main__':
     app.run(debug=True)
