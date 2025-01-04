@@ -8,7 +8,7 @@ import base64
 import io
 
 # Configuration
-FONT_SIZE = 128
+FONT_SIZE = 48  # Reduced font size for better centering
 FONT_COLOR = "black"
 IMAGE_MODE = "RGB"
 IMAGE_SIZE = (200, 200)
@@ -50,21 +50,12 @@ def create_letter_image(char, font, size=IMAGE_SIZE):
         img = Image.new(IMAGE_MODE, size, IMAGE_BACKGROUND)
         draw = ImageDraw.Draw(img)
         
-        if font:
-            # Get text size using font.getbbox
-            bbox = font.getbbox(char)
-            text_width = bbox[2] - bbox[0]
-            text_height = bbox[3] - bbox[1]
-            
-            # Calculate position to center text
-            x = (size[0] - text_width) / 2
-            y = (size[1] - text_height) / 2
-            
-            # Draw text
-            draw.text((x, y), char, font=font, fill=FONT_COLOR)
-        else:
-            # Fallback to basic text rendering
-            draw.text((size[0]/4, size[1]/4), char, fill=FONT_COLOR)
+        # Simple centering - draw at the middle of the image
+        x = size[0] // 2
+        y = size[1] // 2
+        
+        # Draw text centered at (x, y)
+        draw.text((x, y), char, font=font, fill=FONT_COLOR, anchor="mm")
         
         print(f"Successfully created image for character: {char}", file=sys.stderr)
         return img
