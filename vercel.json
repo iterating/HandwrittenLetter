@@ -10,22 +10,21 @@
             "use": "@vercel/static-build",
             "config": {
                 "distDir": "dist",
-                "buildCommand": "cd client && vite build && mv dist ../dist"
-
+                "buildCommand": "cd client && pnpm install && vite build && mv dist ../dist"
             }
         }
     ],
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "app.py"
+            "dest": "/app.py"
         },
         {
             "handle": "filesystem"
         },
         {
             "src": "/(.*)",
-            "dest": "client/dist/index.html"
+            "dest": "/dist/$1"
         }
     ]
 }
