@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r server/requirements.txt
 
 # Copy the application code
 COPY . .
@@ -32,4 +32,4 @@ ENV PORT=8000
 EXPOSE $PORT
 
 # Run the application with gunicorn
-CMD gunicorn --bind 0.0.0.0:$PORT app:app
+CMD cd /server &&  gunicorn --bind 0.0.0.0:$PORT app:app
