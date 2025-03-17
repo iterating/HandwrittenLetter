@@ -4,6 +4,11 @@ import pygame
 from pygame.locals import *
 from pygame import Color
 from PIL import Image, ImageEnhance
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Constants
 WIDTH = 500
@@ -17,7 +22,20 @@ BLACK = (0, 0, 0)
 try:
     pygame.init()
 except pygame.error as e:
-    print(f"Error: {e}")
+    logger.error(f"Failed to initialize Pygame: {e}")
+    sys.exit()
+
+# Set up paths
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+IMAGES_DIR = os.path.join(BASE_DIR, 'client', 'public', 'images')
+BRUSH_PATH = os.path.join(IMAGES_DIR, 'brush.png')
+LETTERS_DIR = os.path.join(IMAGES_DIR, 'letters')
+
+# Load brush image
+try:
+    brush = pygame.transform.scale(pygame.image.load(BRUSH_PATH), (15, 15))
+except pygame.error as e:
+    logger.error(f"Failed to load brush image: {e}")
     sys.exit()
 
 # Set up the display
@@ -59,13 +77,12 @@ txt4 = txtfont.render("Edit Previous", True, BLACK)
 
 # Setup initial display
 screen.blit(mydraw, (10, 10))
-brush = pygame.transform.scale(pygame.image.load("images/brush.png"), (15, 15))
 pygame.display.update()
 clock = pygame.time.Clock()
 
 # Variables
 z = 0
-actdirectory = "images/letters"
+actdirectory = LETTERS_DIR
 no_set = 0
 actset = 0
 letter_act_index = 0
@@ -81,35 +98,32 @@ def render_display():
 def check_directory():
     """Check if the directory exists and create it if it doesn't"""
     global actdirectory, no_set, actset
-    sdir = os.path.isdir(actdirectory)
-    if sdir:
-        cdir = os.listdir("images/letters")
+    try:
+        cdir = os.listdir(actdirectory)
         no_set = len(cdir)
         actset = no_set + 1
-        actdirectory = f"images/letters/set{actset}"
-        os.mkdir(actdirectory)
-        os.mkdir(actdirectory + "/blue")
-        os.mkdir(actdirectory + "/black")
-    else:
-        os.mkdir("images/letters")
-        actset = 1
-        actdirectory = f"images/letters/set{actset}"
-        os.mkdir(actdirectory)
-        os.mkdir(actdirectory + "/blue")
-        os.mkdir(actdirectory + "/black")
+        actdirectory = os.path.join(actdirectory, f"set{actset}")
+        if not os.path.exists(actdirectory):
+            os.makedirs(actdirectory)
+            os.makedirs(os.path.join(actdirectory, 'blue'))
+            os.makedirs(os.path.join(actdirectory, 'black'))
+            logger.info(f"Created set{actset} directories in: {actdirectory}")
+    except Exception as e:
+        logger.error(f"Error in check_directory: {e}")
+        raise
 
 def create_letter():
     """Save the current letter as a PNG image and create a new letter"""
     global actdirectory, letter_act_index, instructions, letter_images
     letter = ord(letterlist[letter_act_index])
-    imfile = f"{actdirectory}/blue/{letter}.png"
+    imfile = os.path.join(actdirectory, 'blue', f"{letter}.png")
     pygame.image.save(mydraw, imfile)
     im = Image.open(imfile)
     enhancer = ImageEnhance.Brightness(im)
     factor = 0.35
     im_output = enhancer.enhance(factor)
-    im_output.save(f"{actdirectory}/black/{letter}.png")
-    letter_images.append((letter, imfile, f"{actdirectory}/black/{letter}.png"))
+    im_output.save(os.path.join(actdirectory, 'black', f"{letter}.png"))
+    letter_images.append((letter, imfile, os.path.join(actdirectory, 'black', f"{letter}.png")))
     letter_act_index += 1
     if letter_act_index < 87:
         instructions = f"Draw --> {letterlist[letter_act_index]}"
