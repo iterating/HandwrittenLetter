@@ -31,10 +31,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy server files
-COPY server.py .
-COPY requirements.txt .
 COPY server/ ./server/
-COPY .env .
+COPY server.py .
 
 # Make sure the __init__.py file exists
 RUN touch server/__init__.py
@@ -45,7 +43,6 @@ COPY --from=client-builder /app/client/dist ./client/dist
 
 # Install dependencies
 RUN pip install --no-cache-dir -r server/requirements.txt
-RUN if [ -f server/requirements.txt ]; then pip install --no-cache-dir -r server/requirements.txt; fi
 RUN pip install --no-cache-dir pygame
 
 # Create necessary directories for image generation if they don't exist
