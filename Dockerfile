@@ -44,7 +44,7 @@ COPY --from=client-builder /app/client/public ./client/public
 COPY --from=client-builder /app/client/dist ./client/dist
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r server/requirements.txt
 RUN if [ -f server/requirements.txt ]; then pip install --no-cache-dir -r server/requirements.txt; fi
 RUN pip install --no-cache-dir pygame
 
