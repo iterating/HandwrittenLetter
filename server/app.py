@@ -24,7 +24,7 @@ IMAGE_BACKGROUND = "white"
 FONT_COLOR = "black"
 
 # CORS Configuration
-default_origins = ['https://handwrittenletter.vercel.app']
+default_origins = ['https://handwrittenletter.onrender.com']
 ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',') or default_origins
 if os.getenv('FLASK_ENV') == 'development':
     ALLOWED_ORIGINS.extend(['http://localhost:5173', 'http://127.0.0.1:5173'])
@@ -178,4 +178,5 @@ def health_check():
     return jsonify({'status': 'healthy'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=os.environ.get('FLASK_ENV') == 'development')

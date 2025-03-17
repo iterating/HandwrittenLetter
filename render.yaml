@@ -1,0 +1,23 @@
+services:
+  # Backend API service
+  - type: web
+    name: handwrittenletter-api
+    env: docker
+    dockerfilePath: ./server/Dockerfile
+    buildCommand: docker build -t handwrittenletter-api ./server
+    startCommand: docker run --env PORT=$PORT handwrittenletter-api
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: ALLOWED_ORIGINS
+        value: https://handwrittenletter.onrender.com
+
+  # Frontend static site
+  - type: web
+    name: handwrittenletter
+    env: static
+    buildCommand: cd client && corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm run build
+    staticPublishPath: ./client/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://handwrittenletter.onrender.com
