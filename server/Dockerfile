@@ -26,7 +26,7 @@ RUN mkdir -p ../client/public/images/letters/set1
 # Set environment variables
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
-ENV PORT=8000
+ENV PORT=10000
 
 # Expose the port
 EXPOSE $PORT
