@@ -2,8 +2,16 @@
  * API configuration for the application
  */
 
-// Use environment variable for API URL in production
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+// Determine if we're in development or production
+const isDevelopment = import.meta.env.DEV;
+
+// In production, we'll use the API URL from environment variables
+// In development, we'll use the proxy set up in vite.config.js (empty base URL)
+export const API_BASE_URL = isDevelopment ? '' : (import.meta.env.VITE_API_URL || 'https://handwrittenletter.onrender.com');
+
+// Log the environment and API configuration
+console.log('Environment:', isDevelopment ? 'Development' : 'Production');
+console.log('API Base URL:', API_BASE_URL || '(using proxy)');
 
 export const API_ENDPOINTS = {
     SAVE_LETTER: '/api/save-letter',

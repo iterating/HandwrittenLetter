@@ -1,6 +1,10 @@
 import { API_BASE_URL, API_ENDPOINTS } from '../config/api';
 import logger from '../utils/logger';
 
+// Log the API base URL for debugging
+console.log('API Base URL:', API_BASE_URL);
+logger.info('API Base URL:', API_BASE_URL);
+
 /**
  * API service for making requests to the backend
  */
@@ -14,6 +18,8 @@ class ApiService {
    */
   async request(endpoint, method = 'GET', data = null) {
     const url = `${API_BASE_URL}${endpoint}`;
+    console.log(`Making API request to: ${url}`);
+    
     const options = {
       method,
       headers: {
@@ -30,7 +36,15 @@ class ApiService {
     logger.apiRequest(endpoint, method, data);
 
     try {
-      const response = await fetch(url, options);
+      // Add timeout to the fetch request
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Request timeout - server might be down or unreachable')), 10000)
+      );
+      
+      const response = await Promise.race([
+        fetch(url, options),
+        timeoutPromise
+      ]);
       
       // For non-JSON responses or empty responses
       if (!response.ok) {
@@ -62,6 +76,18 @@ class ApiService {
       return responseData;
     } catch (error) {
       logger.error('API request failed:', error.message);
+      console.error('API request failed:', error);
+      
+      // Provide more helpful error messages based on error type
+      if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+        console.error('Network error details:', {
+          apiUrl: API_BASE_URL,
+          endpoint,
+          fullUrl: url,
+          mode: options.mode
+        });
+      }
+      
       throw error;
     }
   }
@@ -99,7 +125,11 @@ class ApiService {
    * @returns {Promise} - Response data
    */
   healthCheck() {
-    return this.request('/health', 'GET');
+    // Use a simpler endpoint for health check
+    return this.request('/health', 'GET').catch(error => {
+      logger.error('Health check failed:', error.message);
+      throw error;
+    });
   }
 }
 
