@@ -28,6 +28,7 @@ RUN apt-get update && apt-get install -y \
     libsdl2-ttf-dev \
     libsdl2-image-dev \
     libsdl2-mixer-dev \
+    xvfb \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy server files
@@ -54,9 +55,10 @@ ENV SDL_VIDEODRIVER=dummy
 ENV SDL_AUDIODRIVER=dummy
 ENV XDG_RUNTIME_DIR=/tmp
 ENV PYTHONPATH=/app:/app/server:$PYTHONPATH
+ENV PYGAME_HIDE_SUPPORT_PROMPT=1
 
 # Expose port - this is just documentation
 EXPOSE 8080
 
 # Start the application with $PORT from environment
-CMD gunicorn --workers=4 --bind 0.0.0.0:$PORT server.app:app
+CMD gunicorn --workers=2 --timeout=180 --log-level=debug --preload --bind 0.0.0.0:$PORT server.app:app
