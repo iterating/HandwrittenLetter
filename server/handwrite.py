@@ -98,6 +98,12 @@ def render_display():
 def check_directory():
     """Check if the directory exists and create it if it doesn't"""
     global actdirectory, no_set, actset
+    
+    # Skip directory creation if disabled via environment variable
+    if os.environ.get('DISABLE_AUTO_DIRECTORY_CREATION') == 'true':
+        logger.info("Automatic directory creation is disabled")
+        return
+        
     try:
         cdir = os.listdir(actdirectory)
         no_set = len(cdir)
