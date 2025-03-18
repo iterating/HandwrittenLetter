@@ -53,7 +53,7 @@ ENV PORT=8080
 ENV SDL_VIDEODRIVER=dummy
 ENV SDL_AUDIODRIVER=dummy
 ENV XDG_RUNTIME_DIR=/tmp
-ENV PYTHONPATH=/app:$PYTHONPATH
+ENV PYTHONPATH=/app:/app/server:$PYTHONPATH
 
 # Expose port - this is just documentation
 EXPOSE 8080
