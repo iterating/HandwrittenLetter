@@ -30,23 +30,21 @@ IMAGE_SIZE = (200, 200)
 IMAGE_BACKGROUND = "white"
 FONT_COLOR = "black"
 
-# CORS Configuration
-default_origins = ['https://handwrittenletter.onrender.com']
-ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', '').split(',') or default_origins
-if os.getenv('FLASK_ENV') == 'development':
-    ALLOWED_ORIGINS.extend(['http://localhost:5173', 'http://127.0.0.1:5173'])
-
-CORS_CONFIG = {
-    r"/api/*": {
-        "origins": ALLOWED_ORIGINS,
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-}
-
+# Initialize Flask app
 app = Flask(__name__)
-CORS(app, resources=CORS_CONFIG)
 
+# Configure CORS to allow requests from any origin
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
+
+# Set additional CORS headers for all responses
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    return response
+
+# Log all requests
 @app.before_request
 def log_request_info():
     logger.info('Headers: %s', request.headers)

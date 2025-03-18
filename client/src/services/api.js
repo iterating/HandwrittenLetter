@@ -19,6 +19,8 @@ class ApiService {
       headers: {
         'Content-Type': 'application/json',
       },
+      mode: 'cors',
+      credentials: 'omit'
     };
 
     if (data) {
@@ -29,13 +31,33 @@ class ApiService {
 
     try {
       const response = await fetch(url, options);
-      const responseData = await response.json();
       
-      logger.apiResponse(endpoint, response.status, responseData);
-      
+      // For non-JSON responses or empty responses
       if (!response.ok) {
-        throw new Error(responseData.error || 'An error occurred');
+        if (response.status === 0) {
+          throw new Error('Network error - check if the API server is running and CORS is configured correctly');
+        }
+        
+        let errorMessage;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || `Server error: ${response.status}`;
+        } catch (e) {
+          errorMessage = `HTTP error: ${response.status} ${response.statusText}`;
+        }
+        
+        throw new Error(errorMessage);
       }
+      
+      // Handle empty responses
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        logger.warn(`Response is not JSON: ${contentType}`);
+        return { success: true };
+      }
+      
+      const responseData = await response.json();
+      logger.apiResponse(endpoint, response.status, responseData);
       
       return responseData;
     } catch (error) {
