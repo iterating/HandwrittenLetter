@@ -6,7 +6,6 @@ COPY client/ ./client/
 # Build the React frontend (Vite outputs to dist folder)
 WORKDIR /app/client
 RUN npm install
-# Update the build command to use the standard output directory
 RUN npm run build || echo "Build failed, but continuing with fallback mechanism"
 # Create a fallback index.html if build fails
 RUN mkdir -p dist && \
@@ -40,7 +39,7 @@ RUN touch server/__init__.py
 
 # Copy client directories from the previous stage
 COPY --from=client-builder /app/client/public ./client/public
-COPY --from=client-builder /app/client/dist ./static
+COPY --from=client-builder /app/client/dist ./client/dist
 
 # Install dependencies
 RUN pip install --no-cache-dir -r server/requirements.txt
@@ -58,8 +57,6 @@ ENV XDG_RUNTIME_DIR=/tmp
 ENV PYTHONPATH=/app:/app/server:$PYTHONPATH
 ENV PYGAME_HIDE_SUPPORT_PROMPT=1
 ENV DISABLE_AUTO_DIRECTORY_CREATION=true
-# Set API URL for the frontend to connect to the backend
-ENV VITE_API_URL=""
 
 # Expose port - this is just documentation
 EXPOSE 8080
