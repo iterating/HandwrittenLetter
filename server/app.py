@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 import sys
@@ -37,8 +37,17 @@ CORS_CONFIG = {
     }
 }
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../static')
 CORS(app, resources=CORS_CONFIG)
+
+# Serve static files from the React build
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 @app.before_request
 def log_request_info():
