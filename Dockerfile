@@ -32,7 +32,6 @@ RUN apt-get update && apt-get install -y \
 
 # Copy server files
 COPY server/ ./server/
-COPY server.py .
 
 # Make sure the __init__.py file exists
 RUN touch server/__init__.py
@@ -60,4 +59,4 @@ ENV PYTHONPATH=/app:$PYTHONPATH
 EXPOSE 8080
 
 # Start the application with $PORT from environment
-CMD gunicorn --workers=4 --bind 0.0.0.0:$PORT server:app
+CMD gunicorn --workers=4 --bind 0.0.0.0:$PORT server.app:app
