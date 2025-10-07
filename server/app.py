@@ -97,7 +97,9 @@ def save_letter():
             img = Image.open(io.BytesIO(image_bytes))
             
             # Get the directory for saving images
-            base_dir = os.path.join('client', 'public', 'images', 'letters', 'set1')
+            
+            base_dir = os.path.join('client', 'public', 'images', 'letters', 'set1')|"../temp/uploads/"
+            
             if not os.path.exists(base_dir):
                 os.makedirs(base_dir, exist_ok=True)
                 os.makedirs(os.path.join(base_dir, 'blue'), exist_ok=True)
